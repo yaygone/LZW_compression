@@ -22,7 +22,7 @@ class LZWdecode
 		for (int i = 0; i < temp.length; i++)
 			indices.add(Integer.parseInt(temp[i]));
 
-		mamaNode = new TrieNode((byte)'_');
+		mamaNode = new TrieNode((byte)-1);
 
 		for (int i = 0; i < dict.length; i++)
 			mamaNode.children.add(new TrieNode((byte)dict[i].toCharArray()[0]));
@@ -85,7 +85,7 @@ class LZWdecode
 		{
 			try
 			{
-				if (content != (byte)'_')
+				if (content != (byte)-1)
 					fullContent = prefix + (char)content;
 				for (TrieNode child : children)
 					child.expandContent(fullContent);
@@ -93,6 +93,5 @@ class LZWdecode
 			catch (Exception e)
 			{ System.err.println("expandContent error" + e); }
 		}
-
 	}
 }

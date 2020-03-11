@@ -1,33 +1,46 @@
+import java.util.ArrayList;
+
 class LZWdecode
 {
 	public static int nodeCount = -1;
-	public static int[] inputData;
-	byte[] compressedData;
+	public static ArrayList<Integer> indices;
+	TrieNode mamaNode;
 	static ArrayList<TrieNode> outputList = new ArrayList<TrieNode>();
 
 	public static void main(String[] args)
 	{
 		if (args.length != 2)
-			System.err.println("Usage: java LZWdecode <a=0,b=1,c=2...> <0,1,0,2,4...>");
-		else new LZWdecode(args[0]).run(args);
+			System.err.println("Usage: java LZWdecode <a,b,c...> <0,1,0,2,4...>");
+		else new LZWdecode().process(args);
 	}
 
-	public LZWdecode(String input)
-	{ compressedData = input.getBytes(); }
-
-	public void run(String[] args)
+	public void process(String[] args)
 	{
 		String[] dict = args[0].split(",");
 		String[] temp = args[1].split(",");
-		inputData = new int[temp.length];
+		indices = new ArrayList<Integer>();
 		for (int i = 0; i < temp.length; i++)
-			inputData[i] = Integer.parseInt(temp[i]);
-		TrieNode mamaNode = new TrieNode((byte)'_');
-		for ()
-		for (byte b : compressedData)
+			indices.add(Integer.parseInt(temp[i]));
+
+		mamaNode = new TrieNode((byte)'_');
+
+		for (int i = 0; i < dict.length; i++)
+			mamaNode.children.add(new TrieNode((byte)dict[i].toCharArray()[0]));
+		while (indices.size() > 0)
 		{
-			
+			mamaNode.buildTrie(indices.get(0), indices.size() > 1 ? indices.get(1) : -1);
+			indices.remove(0);
 		}
+		mamaNode.expandContent("");
+		printData();
+	}
+
+	public void printData()
+	{
+		String output = "";
+		for (TrieNode node : outputList)
+			output += node.fullContent;
+		System.out.println("Decompressed message: " + output);
 	}
 
 	class TrieNode
@@ -35,6 +48,7 @@ class LZWdecode
 		ArrayList<TrieNode> children = new ArrayList<TrieNode>();
 		int index;
 		byte content;
+		String fullContent = "";
 		
 		public TrieNode(byte s)
 		{
@@ -43,22 +57,42 @@ class LZWdecode
 			nodeCount++;
 		}
 
-		public int buildTrie(Byte[] data)
+		public void buildTrie(int curr, int next)
 		{
-			if (index == (int)data[0])
+			if (index == curr)
 			{
 				outputList.add(this);
-				int nextIndex = data.length == 1 ? -1 : date[1];
+				int nextIndex = next;
 				TrieNode newChild = new TrieNode(mamaNode.headSymbol(nextIndex == nodeCount ? index : nextIndex));
 				children.add(newChild);
 			}
 			else
-			{
 				for (TrieNode child : children)
-					child.buildTrie(data);
-			}
+					child.buildTrie(curr, next);
 		}
 
+		public byte headSymbol(int searchIndex)
+		{
+			for (TrieNode child : children)
+				if (child.headSymbol(searchIndex) != -1)
+					return index == -1 ? child.content : content;
+			if (index == searchIndex)
+				return content;
+			return -1;
+		}
+
+		public void expandContent(String prefix)
+		{
+			try
+			{
+				if (content != (byte)'_')
+					fullContent = prefix + (char)content;
+				for (TrieNode child : children)
+					child.expandContent(fullContent);
+			}
+			catch (Exception e)
+			{ System.err.println("expandContent error" + e); }
+		}
 
 	}
 }

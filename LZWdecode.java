@@ -3,6 +3,7 @@ class LZWdecode
 	public static int nodeCount = -1;
 	public static int[] inputData;
 	byte[] compressedData;
+	static ArrayList<TrieNode> outputList = new ArrayList<TrieNode>();
 
 	public static void main(String[] args)
 	{
@@ -31,7 +32,7 @@ class LZWdecode
 
 	class TrieNode
 	{
-		private TrieNode[] children;
+		ArrayList<TrieNode> children = new ArrayList<TrieNode>();
 		int index;
 		byte content;
 		
@@ -42,49 +43,22 @@ class LZWdecode
 			nodeCount++;
 		}
 
-		public int findIndex(Byte[] data)
+		public int buildTrie(Byte[] data)
 		{
-			if (data.length != 1 || data[0] != content)
+			if (index == (int)data[0])
 			{
-				Byte[] newData = new Byte[data.length - 1];
-				for (int i = 1; i < data.length; i++)
-					newData[i - 1] = data[i];
-				if (children != null)
-					for (TrieNode c : children)
-						if (c.matchesByte(data[0])) return findIndex(newData);
+				outputList.add(this);
+				int nextIndex = data.length == 1 ? -1 : date[1];
+				TrieNode newChild = new TrieNode(mamaNode.headSymbol(nextIndex == nodeCount ? index : nextIndex));
+				children.add(newChild);
 			}
-			return index;
-		}
-
-		/**
-		 * Searches for the string of bytes of the index.
-		 * 
-		 * @param searchIndex
-		 * @param data
-		 * @return
-		 */
-		public byte[] findData(int searchIndex, byte[] data)
-		{
-			byte[] returnVal;
-			if (data == null)
-				returnVal = new byte[1];
 			else
 			{
-				returnVal = new byte[data.length + 1];
-				for (int i = 0; i < data.length; i++)
-					returnVal[i] = data[i];
+				for (TrieNode child : children)
+					child.buildTrie(data);
 			}
-			returnVal[returnVal.length - 1] = content;
-			if (children != null)
-				for (TrieNode c : children)
-					return c.findData(searchIndex, returnVal);
-			return returnVal;
 		}
 
-		public boolean matchesByte(byte data)
-		{
-			return content == data;
-		}
 
 	}
 }

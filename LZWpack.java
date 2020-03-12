@@ -35,14 +35,20 @@ class LZWpack
 				}
 				else
 				{
+					// Byte can't fit into current unit's remaining bits, and must be split into head (for current unit) and tail (for next unit)
 					tempData = b;
+					// Input overhang, aka tail size, the number of bits that can't be stored in the current unit's remaining bits
 					inputOverhang = frameSize - outputRemaining;
+					// Store the head into current unit's remaining bits
 					b >>>= inputOverhang;
 					currOutput |= b;
+					// Store away the full unit and prep a new one
 					outputList.add(currOutput);
 					currOutput = 0;
-					tempData <<= 8 - frameSize + inputOverhang;
+					// Now store the tail by shifting the frame left. Move by frame size, plus the head bits that have been stored away.
+					tempData <<= 8 - frameSize + outputRemaining;
 					currOutput |= tempData;
+					// Update output remaining to 8 - tail size
 					outputRemaining = 8 - inputOverhang;
 				}
 			}

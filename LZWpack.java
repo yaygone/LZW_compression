@@ -2,23 +2,48 @@ import java.util.ArrayList;
 
 class LZWpack
 {
-	String input = "";
-	String output = "";
 	public static void main(String[] args)
 	{
-
+		if (args.length > 2)
+		{
+			System.err.println("Usage: <optional:initial dict passthrough> <comma separated code, eg 0,1,2,1,0,4,3...>");
+			return;
+		}
+		String outputString = "";
+		if (args.length == 2)
+		{
+			String dict = "";
+			for (String s : args[0].split(","))
+				dict += s;
+			outputString += dict + ' ';
+		}
+		int argsIndex = args.length == 1 ? 0 : 1;
+		String[] input0 = args[argsIndex].split(",");
+		char[] input1 = new char[input0.length];
+		char maxVal = 0;
+		for (int i = 0; i < input1.length; i++)
+		{
+			input1[i] = input0[i].toCharArray()[0];
+			if (input1[i] > maxVal) maxVal = input1[i];
+		}
+		int bitCount = (int)Math.ceil(Math.log(maxVal) / Math.log(2));
+		outputString += (char)bitCount + ' ';
+		for (char c : new LZWpack().process(input1, bitCount))
+			outputString += c;
+		outputString += ' ';
+		System.out.println(outputString.trim());
 	}
-	public byte[] process(byte[] input, int frameSize)
+	public char[] process(char[] input, int frameSize)
 	{
-		byte[] finalOutput = new byte[0];
+		char[] finalOutput = new char[0];
 		try
 		{
-			byte tempData = 0;
+			char tempData = 0;
 			int inputOverhang = 0;
 			int outputRemaining = 8;
-			byte currOutput = 0;
-			ArrayList<Byte> outputList = new ArrayList<Byte>();
-			for (byte b : input)
+			char currOutput = 0;
+			ArrayList<Character> outputList = new ArrayList<Character>();
+			for (char b : input)
 			{
 				if (outputRemaining >= frameSize)
 				{
@@ -30,7 +55,7 @@ class LZWpack
 					{
 						outputList.add(currOutput);
 						currOutput = 0;
-						outputRemaining = 8;
+						outputRemaining = 16;
 					}
 				}
 				else
@@ -49,11 +74,11 @@ class LZWpack
 					tempData <<= 8 - frameSize + outputRemaining;
 					currOutput |= tempData;
 					// Update output remaining to 8 - tail size
-					outputRemaining = 8 - inputOverhang;
+					outputRemaining = 16 - inputOverhang;
 				}
 			}
 			if (currOutput != 0) outputList.add(currOutput);
-			finalOutput = new byte[outputList.size()];
+			finalOutput = new char[outputList.size()];
 			for (int i = 0; i < finalOutput.length; i++)
 				finalOutput[i] = outputList.get(i);
 		}

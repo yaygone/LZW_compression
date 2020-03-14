@@ -27,7 +27,8 @@ class LZWpack
 			if (input1[i] > maxVal) maxVal = input1[i];
 		}
 		int bitCount = (int)Math.ceil(Math.log(maxVal) / Math.log(2));
-		outputString += (char)bitCount + ' ';
+		//TODO: fix bitcount output
+		outputString += bitCount + ' ';
 		for (char c : new LZWpack().process(input1, bitCount))
 			outputString += c;
 		outputString += ' ';

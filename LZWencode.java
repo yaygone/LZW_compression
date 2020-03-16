@@ -1,163 +1,90 @@
 import java.util.Arrays;
-import java.util.HashSet;
 
-class LZWencode {
-    int BUFFER_SIZE = 256;
-    //trie class
+class LZWencode
+{
+	int BUFFER_SIZE = 256;
+	static int count = -1;
+	static byte[] input = null;
+	static String code = "";
+	static int dictSize = 0;
 
-    static int count = -1;
-    static byte[] string = null;
-    static String code = "";
-    //node class
-    class trie_node {
-        //root node
-        Boolean isRoot = false;
-        trie_node root;
-        byte[] dict;
+	//node class
+	class trie_node
+	{
+		byte[] dict = new byte[BUFFER_SIZE];
+		byte value;
+		int level = count++;
+		trie_node[] children = new trie_node[BUFFER_SIZE];
 
+		public trie_node(byte ch)
+		{ value = ch; }
 
-        int dict_size;
+		//constructor
+		public trie_node()
+		{
+			byte[] charset = input.clone();
+			Arrays.sort(charset);
+			//remove dulplicates from the array
+			for (int j = 0; j < charset.length; j++)
+			{
+				if (charset[j] == 0) continue;
+				for (int i = j; i < charset.length; i++)
+					charset[i] = charset[j] == charset[i] && i != j ? 0 : charset[i];
+				dict[dictSize++] = charset[j];
+			}
+			for (int i = 0; i < dictSize; i++)
+			{
+				children[i] = new trie_node(dict[i]);
+				System.out.println(String.valueOf((char)(children[i].value)) + " = " + children[i].level);
+			}
+			System.out.println("Size = " + count);
+		}
 
-        trie_node[] children;
-        byte value;
-        int level;
+		public void encode(byte[] charset)
+		{
+			input = charset;
+			while (input.length > 0)
+				find();
+			System.out.println(code);
+		}
+		
+		public void find()
+		{
+			if (input.length > 0)
+			{
+				byte curr = input[0];
+				int emptyIndex = -1;
+				for (int i = 0; i < dictSize; i++)
+				{
+					if (children[i] != null && curr == children[i].value)
+					{
+						sub();
+						children[i].find();
+						return;
+					}
+					if (emptyIndex == -1 && children[i] == null) emptyIndex = i;
+				}
+				children[emptyIndex] = new trie_node(curr);
+			}
+			code += level;
+		}
+		
+		public void sub()
+		{
+			byte[] st = new byte[input.length - 1];
+			for (int i = 1; i < input.length; i++)
+				st[i - 1] = input[i];
+			input = st;
+		}
+	}
 
-        public trie_node(byte ch) {
-            children = new trie_node[BUFFER_SIZE];
-            level = count;
-            value = ch;
-        }
-        public trie_node() {
-            children = new trie_node[BUFFER_SIZE];
-            level = count;
+	public static void main(String[] args)
+	{ new LZWencode().run(args); }
 
-        }
-
-
-
-        //constructor 
-        public trie_node(byte[] input) {
-            isRoot = true;
-            dict_size = 0;
-            Arrays.sort(input);
-            dict = new byte[256];
-            root = new trie_node();
-            count++;
-            //remove dulplicates from the array
-            for (int j = 0; j < input.length; j++) {
-                for (int i = 0; i < input.length; i++) {
-
-                    if (input[j] == input[i] && i != j) {
-                        input[i] = '\0';
-                    }
-
-                }
-            }
-            int x = 0;
-            for (int i = 0; i < BUFFER_SIZE; i++) {
-                dict[i] = 0;
-
-            }
-            for (int i = 0; i < input.length; i++) {
-                if (input[i] != 0) {
-                    dict[x] = input[i];
-                    x++;
-                }
-
-            }
-
-            for (int i = 0; i < dict.length; i++) {
-                if (dict[i] != 0) {
-                    root.children[i] = new trie_node(dict[i]);
-
-                    count++;
-                }
-
-            }
-
-
-        }
-
-        public void display_dictionary() {
-            String a;
-            for (int i = 0; i < dict.length; i++) {
-                if (root.children[i] != null) {
-                    if (i != 0)
-                        code += ",";
-                    code += String.valueOf((char)(root.children[i].value));
-                }
-            }
-            code += " ";
-        }
-
-
-        public void encode(byte[] input) {
-            string = input;
-            while (string.length > 0)
-                find(root, string);
-        }
-
-        public void find(trie_node node, byte[] str) {
-
-
-            if (str.length > 0) {
-                byte curr = str[0];
-
-                for (int i = 0; i < node.children.length; i++) {
-                    if (node.children[i] != null && curr == node.children[i].value) {
-                        string = sub(str);
-
-                        find(node.children[i], string);
-
-                        return;
-
-                    }
-
-                }
-                add(node, curr);
-
-                return;
-            } else {
-                code += Integer.toString(node.level);
-                return;
-            }
-        }
-
-        public void add(trie_node node, byte curr) {
-            for (int i = 0; i < node.children.length; i++) {
-                if (node.children[i] == null) {
-                    node.children[i] = new trie_node(curr);
-
-                    count++;
-                    code += Integer.toString(node.level) + ",";
-
-                    break;
-                }
-            }
-            return;
-
-        }
-        public byte[] sub(byte[] str) {
-
-            byte[] st = new byte[str.length - 1];
-            for (int i = 1; i < str.length; i++)
-                st[i - 1] = str[i];
-            return st;
-        }
-
-    }
-
-
-    public static void main(String[] args) {
-        LZWencode lz = new LZWencode();
-        lz.run(args);
-    }
-
-    public void run(String[] args) {
-        byte[] input = args[0].getBytes();
-        trie_node tn = new trie_node(input);
-        tn.display_dictionary();
-        tn.encode(args[0].getBytes());
-        System.out.println(code);
-    }
+	public void run(String[] args)
+	{
+		input = args[0].getBytes();
+		trie_node root = new trie_node();
+		root.encode(input);
+	}
 }

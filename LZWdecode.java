@@ -1,97 +1,75 @@
-import java.util.ArrayList;
+import java.io.*;
+import java.util.*;
 
 class LZWdecode
 {
-	public static int nodeCount = -1;
-	public static ArrayList<Integer> indices;
-	TrieNode mamaNode;
-	static ArrayList<TrieNode> outputList = new ArrayList<TrieNode>();
+	public int bufferSize = (int)Math.pow(2, 8);
+	public MapKey[] indicesMap;
+	public BufferedReader inputStream;
+	public FileOutputStream outputStream;
 
 	public static void main(String[] args)
 	{
-		if (args.length != 2)
-			System.err.println("Usage: java LZWdecode <a,b,c...> <0,1,0,2,4...>");
-		else new LZWdecode().process(args);
+		if (args.length == 0 || args.length > 2) System.err.println("Usage requires target file to be decompressed, and (optional) output file. Default output to output.file if not given."
+		+ "\n" + "example: java LZWdecode input.file output.mp3");
+		else
+			try {new LZWdecode().process(args);} catch (Exception e) {System.err.println(e);}
 	}
 
-	public void process(String[] args)
+	public void process(String[] args) throws FileNotFoundException, IOException
 	{
-		String[] dict = args[0].split(",");
-		String[] temp = args[1].split(",");
-		indices = new ArrayList<Integer>();
-		for (int i = 0; i < temp.length; i++)
-			indices.add(Integer.parseInt(temp[i]));
-
-		mamaNode = new TrieNode((byte)-1);
-
-		for (int i = 0; i < dict.length; i++)
-			mamaNode.children.add(new TrieNode((byte)dict[i].toCharArray()[0]));
-		while (indices.size() > 0)
+		inputStream = new BufferedReader(new FileReader(args[0]));
+		List<String> inputRaw = new ArrayList<String>();
+		String s = inputStream.readLine();
+		while (s != null)
 		{
-			mamaNode.buildTrie(indices.get(0), indices.size() > 1 ? indices.get(1) : -1);
-			indices.remove(0);
+			inputRaw.add(s);
+			s = inputStream.readLine();
 		}
-		mamaNode.expandContent("");
-		printData();
-	}
-
-	public void printData()
-	{
-		String output = "";
-		for (TrieNode node : outputList)
-			output += node.fullContent;
-		System.out.println("Decompressed message: " + output);
-	}
-
-	class TrieNode
-	{
-		ArrayList<TrieNode> children = new ArrayList<TrieNode>();
-		int index;
-		byte content;
-		String fullContent = "";
-		
-		public TrieNode(byte s)
+		int[] input = new int[inputRaw.toArray().length];
+		for (int i = 0; i < input.length; i++)
 		{
-			content = s;
-			index = nodeCount;
-			nodeCount++;
+			input[i] = Integer.parseInt(inputRaw.toArray()[i].toString());
+			System.out.println("Next input: " + input[i]);
 		}
 
-		public void buildTrie(int curr, int next)
+		indicesMap = new MapKey[input.length + bufferSize];
+		for (int i = 0; i < indicesMap.length; i++)
 		{
-			if (index == curr)
-			{
-				outputList.add(this);
-				int nextIndex = next;
-				TrieNode newChild = new TrieNode(mamaNode.headSymbol(nextIndex == nodeCount ? index : nextIndex));
-				children.add(newChild);
-			}
+			if (i < bufferSize) indicesMap[i] = new MapKey(i);
 			else
-				for (TrieNode child : children)
-					child.buildTrie(curr, next);
-		}
-
-		public byte headSymbol(int searchIndex)
-		{
-			for (TrieNode child : children)
-				if (child.headSymbol(searchIndex) != -1)
-					return index == -1 ? child.content : content;
-			if (index == searchIndex)
-				return content;
-			return -1;
-		}
-
-		public void expandContent(String prefix)
-		{
-			try
 			{
-				if (content != (byte)-1)
-					fullContent = prefix + (char)content;
-				for (TrieNode child : children)
-					child.expandContent(fullContent);
+				indicesMap[i] = new MapKey(input[i - bufferSize]);
+				if (i != indicesMap.length - 1) indicesMap[i].next = indicesMap[input[i + 1 - bufferSize]];
 			}
-			catch (Exception e)
-			{ System.err.println("expandContent error" + e); }
+		}
+		outputStream = new FileOutputStream(new File(args.length == 2 ? args[1] : "output.txt"), false);
+		for (int i : input)
+			indicesMap[i].output();
+		outputStream.close();
+	}
+		
+	public class MapKey
+	{
+		int value;
+		MapKey next = null;
+		
+		public MapKey(int valueInput)
+		{ value = valueInput; }
+		
+		public void output() throws IOException
+		{
+			if (value >= bufferSize)
+				indicesMap[value].output();
+			outputStream.write(value);
+			if (next != null) outputStream.write(next.returnFirstSymbol());
+		}
+
+		public int returnFirstSymbol()
+		{
+			if (value < bufferSize)
+				return value;
+			else return next.returnFirstSymbol();
 		}
 	}
 }

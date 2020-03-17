@@ -1,3 +1,10 @@
+import java.io.BufferedReader;
+import java.io.FileInputStream;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.util.ArrayList;
 import java.util.Arrays;
 
 class LZWencode
@@ -22,30 +29,20 @@ class LZWencode
 		//constructor
 		public trie_node()
 		{
-			byte[] charset = input.clone();
-			Arrays.sort(charset);
-			//remove dulplicates from the array
-			for (int j = 0; j < charset.length; j++)
+			
+			
+			for (int i = 0; i < BUFFER_SIZE; i++)
 			{
-				if (charset[j] == 0) continue;
-				for (int i = j; i < charset.length; i++)
-					charset[i] = charset[j] == charset[i] && i != j ? 0 : charset[i];
-				dict[dictSize++] = charset[j];
+				children[i] = new trie_node((byte)i);
 			}
-			for (int i = 0; i < dictSize; i++)
-			{
-				children[i] = new trie_node(dict[i]);
-				System.out.println(String.valueOf((char)(children[i].value)) + " = " + children[i].level);
-			}
-			System.out.println("Size = " + count);
+			dictSize=count;
 		}
 
 		public void encode(byte[] charset)
 		{
 			input = charset;
 			while (input.length > 0)
-				find();
-			System.out.println(code);
+				find();	
 		}
 		
 		public void find()
@@ -66,7 +63,7 @@ class LZWencode
 				}
 				children[emptyIndex] = new trie_node(curr);
 			}
-			code += level;
+			code += level+"\n";
 		}
 		
 		public void sub()
@@ -83,8 +80,29 @@ class LZWencode
 
 	public void run(String[] args)
 	{
-		input = args[0].getBytes();
-		trie_node root = new trie_node();
-		root.encode(input);
+		ArrayList<Byte> list = new ArrayList<>();
+		int x=0;
+        try
+        {
+			FileInputStream is = new FileInputStream(args[0]);
+			for(x=is.read();x!=-1;x=is.read())
+			{
+				list.add((byte)x);
+			}
+			input = new byte[list.size()];
+			for(int i=0;i<list.size();i++)
+			{
+				input[i] = (byte)list.get(i);
+			}
+            trie_node root = new trie_node();
+			root.encode(input);
+			FileWriter wr = new FileWriter("Compressed.txt");
+			wr.write(code);
+			wr.close();
+        }
+        catch(Exception ex)
+        {
+            System.err.println(ex);
+        }
 	}
 }

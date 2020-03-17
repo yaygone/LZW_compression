@@ -28,22 +28,13 @@ class LZWencode
 		//constructor
 		public trie_node()
 		{
-			byte[] charset = input.clone();
-			Arrays.sort(charset);
-			//remove dulplicates from the array
-			for (int j = 0; j < charset.length; j++)
+			
+			
+			for (int i = 0; i < BUFFER_SIZE; i++)
 			{
-				if (charset[j] == 0) continue;
-				for (int i = j; i < charset.length; i++)
-					charset[i] = charset[j] == charset[i] && i != j ? 0 : charset[i];
-				dict[dictSize++] = charset[j];
+				children[i] = new trie_node((byte)i);
 			}
-			for (int i = 0; i < dictSize; i++)
-			{
-				children[i] = new trie_node(dict[i]);
-				System.out.println(String.valueOf((char)(children[i].value)) + " = " + children[i].level);
-			}
-			System.out.println("Size = " + count);
+			dictSize=count;
 		}
 
 		public void encode(byte[] charset)
@@ -72,7 +63,7 @@ class LZWencode
 				}
 				children[emptyIndex] = new trie_node(curr);
 			}
-			code += level;
+			code += level+"\n";
 		}
 		
 		public void sub()

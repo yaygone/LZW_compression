@@ -4,7 +4,7 @@ import java.util.*;
 class LZWdecode
 {
 	public int bufferSize = (int)Math.pow(2, 8);
-	public MapKey[] indicesMap;
+	public MapKey[] dictionary;
 	public FileOutputStream outputStream;
 
 	public static void main(String[] args)
@@ -21,40 +21,65 @@ class LZWdecode
 		for (String s = inputStream.readLine(); s != null; s = inputStream.readLine())
 			inputRaw.add(s);
 		inputStream.close();
-		int[] input = new int[inputRaw.toArray().length];
+		int[] input = new int[inputRaw.size()];
 		for (int i = 0; i < input.length; i++)
 			input[i] = Integer.parseInt(inputRaw.toArray()[i].toString());
-		indicesMap = new MapKey[input.length + bufferSize];
-		for (int i = 0; i < indicesMap.length; i++)
+		dictionary = new MapKey[input.length + bufferSize];
+		for (int i = 0; i < dictionary.length; i++)
 		{
-			if (i < bufferSize) indicesMap[i] = new MapKey(i);
+			if (i < bufferSize) dictionary[i] = new MapKey(i);
 			else
 			{
-				indicesMap[i] = new MapKey(input[i - bufferSize]);
-				if (i != indicesMap.length - 1) indicesMap[i].next = indicesMap[input[i + 1 - bufferSize]];
+				MapKey tempNode = new MapKey(input[i - bufferSize]);
+				dictionary[i] = tempNode;
+				if (i != dictionary.length - 1)
+				{
+			 		if (i == input[i + 1 - bufferSize]) tempNode.next = tempNode.returnFirstSymbol();
+					else dictionary[i].next = dictionary[input[i + 1 - bufferSize]].returnFirstSymbol();
+				}
 			}
 		}
 		outputStream = new FileOutputStream(new File(args.length == 2 ? args[1] : "output.txt"), false);
-		for (int i : input) indicesMap[i].output();
+		for (int i : input)
+		{
+			System.out.println("next symbol being processed!");
+			dictionary[i].output(true);
+		}
 		outputStream.close();
-	}
+		}
 		
 	public class MapKey
 	{
-		int value;
-		MapKey next = null;
+		int parentAddress;
+		int next = -1;
 		
 		public MapKey(int valueInput)
-		{ value = valueInput; }
+		{ parentAddress = valueInput; }
 		
-		public void output() throws IOException
+		public void output(boolean topLevel) throws IOException
 		{
-			if (value >= bufferSize) indicesMap[value].output();
-			outputStream.write(value);
-			if (next != null) outputStream.write(next.returnFirstSymbol());
+			if (parentAddress >= bufferSize)
+			{
+				System.out.println("key value " + parentAddress + " is not in byte range. Searching now...");
+				dictionary[parentAddress].output(false);
+			}
+			else
+			{
+				outputStream.write((byte)parentAddress);
+				System.out.println("Returning key value " + parentAddress);
+				System.out.println((byte)parentAddress);
+				
+			}
+			if (next != -1)
+			{
+				System.out.println("Going to print next character " + next);
+				outputStream.write((byte)next);
+				System.out.println((byte)next);
+			}
+			else System.out.println("no next pointer, nothing to print...");
 		}
 
 		public int returnFirstSymbol()
-		{ return (value < bufferSize) ? value : next.returnFirstSymbol(); }
+		{ return (parentAddress < bufferSize) ? parentAddress : dictionary[parentAddress].returnFirstSymbol(); }
 	}
 }

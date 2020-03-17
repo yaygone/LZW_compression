@@ -3,6 +3,7 @@ import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
 import java.util.Arrays;
 
 class LZWencode
@@ -88,11 +89,21 @@ class LZWencode
 
 	public void run(String[] args)
 	{
+		ArrayList<Byte> list = new ArrayList<>();
+		int x=0;
         try
         {
-            InputStream is = new FileInputStream(args[0]);
-            BufferedReader br = new BufferedReader(new InputStreamReader(is));
-            input = br.readLine().getBytes();
+			FileInputStream is = new FileInputStream(args[0]);
+			for(x=is.read();x!=-1;x=is.read())
+			{
+				list.add((byte)x);
+			}
+			input = new byte[list.size()];
+			for(int i=0;i<list.size();i++)
+			{
+				input[i] = (byte)list.get(i);
+			}
+			
             trie_node root = new trie_node();
             root.encode(input);
         }

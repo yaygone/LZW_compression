@@ -35,7 +35,7 @@ class LZWdecode
 				if (i != dictionary.length - 1)
 				{
 			 		if (i == input[i + 1 - bufferSize]) tempNode.next = tempNode.returnFirstSymbol();
-					else dictionary[i].next = dictionary[input[i + 1 - bufferSize]].returnFirstSymbol();
+					else tempNode.next = dictionary[input[i + 1 - bufferSize]].returnFirstSymbol();
 				}
 			}
 		}

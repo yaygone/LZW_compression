@@ -18,7 +18,6 @@ class LZWpack
 
 	public void run(String[] args) throws FileNotFoundException, IOException
 	{
-
 		BufferedReader reader = new BufferedReader(new FileReader(args[0]));
 		
 		//Transfer all input data into an arraylist for processing
@@ -26,66 +25,46 @@ class LZWpack
 			inputList.add(Integer.parseInt(s));
 		reader.close();
 
-		
 		outputStream = new FileOutputStream(new File(args.length == 2 ? args[1] : "output.pack"));
 		int[] inputArray = new int[inputList.size()];
 		for (int i = 0; i < inputArray.length; i++)
 			inputArray[i] = Integer.parseInt(inputList.get(i).toString());
 		process(inputArray);
 	}
-	public void process(int[] input)
+	public void process(int[] input) throws IOException
 	{
-		try
+		int byteBitCount = 8;
+		byte outputBuffer = 0;
+		int remainingInputBits;
+		int remainingOutputBits = byteBitCount;
+		for (int i : input)
 		{
-			int tempData = 0;
-			int remainingInputBits = 0;
-			int availOutputBits = 32;
-			byte currOutput = 0;
-			int frameSize;
-			for (int i : input)
+			remainingInputBits = (int)Math.ceil(Math.log(entryCount++) / Math.log(2));
+			while (remainingInputBits > remainingOutputBits)
 			{
-				frameSize = (int)Math.ceil(Math.log(entryCount++) / Math.log(2));
-				if (availOutputBits >= frameSize)
-				{
-					availOutputBits -= frameSize;
-					i <<= availOutputBits;
-					currOutput |= i;
-					// If there is no more space, then store away the unit and prep a fresh one for the next loop.
-					if (availOutputBits == 0)
-					{
-						outputStream.write(currOutput);
-						currOutput = 0;
-						availOutputBits = 8;
-					}
-				}
-				else while (frameSize > availOutputBits)
-				{
-					// Input overhang, aka tail size, the number of bits that can't be stored in the current unit's remaining bits
-					remainingInputBits = frameSize - availOutputBits;
-					if (remainingInputBits >= 0)
-					{
-						// Store the head into current unit's remaining bits
-						tempData >>>= remainingInputBits;
-						tempData |= (int)(Math.pow(2, availOutputBits) - 1);
-						currOutput |= tempData;
-						frameSize -= availOutputBits;
-						// Store away the full unit and prep a new one
-						outputStream.write(currOutput);
-						currOutput = 0;
-						availOutputBits = 8;
-					}
-					else
-					{
-						tempData |= (int)(Math.pow(2, frameSize) - 1);
-						tempData <<= (availOutputBits - frameSize);
-						currOutput |= tempData;
-						availOutputBits -= frameSize;
-					}
-				}
+				int tempData = i;
+				tempData >>>= remainingInputBits - remainingOutputBits;
+				tempData &= (int)(Math.pow(2, remainingOutputBits) - 1);
+				outputBuffer |= tempData;
+				outputStream.write(outputBuffer);
+				outputBuffer = 0;
+				remainingInputBits -= remainingOutputBits;
+				remainingOutputBits = byteBitCount;
 			}
-			if (currOutput != 0) outputStream.write(currOutput);
-			outputStream.flush();
-			outputStream.close();
-		} catch (Exception e) {System.err.println(e);}
+			int tempData = i;
+			tempData &= (int)(Math.pow(2, remainingInputBits) - 1);
+			tempData <<= remainingOutputBits - remainingInputBits;
+			outputBuffer |= tempData;
+			remainingOutputBits -= remainingInputBits;
+			if (remainingOutputBits == 0)
+			{
+				outputStream.write(outputBuffer);
+				outputBuffer = 0;
+				remainingOutputBits = byteBitCount;
+			}
+		}
+		if (outputBuffer != 0) outputStream.write(outputBuffer);
+		outputStream.flush();
+		outputStream.close();
 	}
 }

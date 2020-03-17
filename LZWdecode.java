@@ -9,8 +9,8 @@ class LZWdecode
 
 	public static void main(String[] args)
 	{
-		if (args.length == 0 || args.length > 2) System.err.println("Usage requires target file to be decompressed, and (optional) output file. Defaults to \"output.file\" if not given."
-			+ "\n" + "example: java LZWdecode input.file output.mp3");
+		if (args.length == 0 || args.length > 2) System.err.println("Usage requires target file to be decompressed, and (optional) output file. "
+		 + "Defaults to \"output.file\" if not given." + "\n" + "example: java LZWdecode input.file output.mp3");
 		else try { new LZWdecode().process(args); } catch (Exception e) { System.err.println(e); }
 	}
 

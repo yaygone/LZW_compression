@@ -1,6 +1,7 @@
 import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
@@ -41,8 +42,7 @@ class LZWencode
 		{
 			input = charset;
 			while (input.length > 0)
-				find();
-			System.out.println(code);
+				find();	
 		}
 		
 		public void find()
@@ -94,9 +94,11 @@ class LZWencode
 			{
 				input[i] = (byte)list.get(i);
 			}
-			
             trie_node root = new trie_node();
-            root.encode(input);
+			root.encode(input);
+			FileWriter wr = new FileWriter("Compressed.txt");
+			wr.write(code);
+			wr.close();
         }
         catch(Exception ex)
         {

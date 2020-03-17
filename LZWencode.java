@@ -1,3 +1,8 @@
+import java.io.BufferedReader;
+import java.io.FileInputStream;
+import java.io.FileReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.Arrays;
 
 class LZWencode
@@ -83,8 +88,17 @@ class LZWencode
 
 	public void run(String[] args)
 	{
-		input = args[0].getBytes();
-		trie_node root = new trie_node();
-		root.encode(input);
+        try
+        {
+            InputStream is = new FileInputStream(args[0]);
+            BufferedReader br = new BufferedReader(new InputStreamReader(is));
+            input = br.readLine().getBytes();
+            trie_node root = new trie_node();
+            root.encode(input);
+        }
+        catch(Exception ex)
+        {
+            System.err.println(ex);
+        }
 	}
 }

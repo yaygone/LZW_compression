@@ -1,41 +1,56 @@
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Scanner;
 
-LZWunpack
+class LZWunpack
 {
-	String inputString = "";
-	public static void main(String[] args)
+	String inputString;
+	int entryCount=256;
+	int readSize=0;
+	public static void main(String[] args)throws IOException
 	{
-		args[0].toCharArray();
-		
+		LZWunpack unpack = new LZWunpack();
+		unpack.getCode();
+		unpack.process();
+	}
+	public void process()
+	{
+		int phrase=0;
+		int start=0;
+		int u=0;
+		while(true)
+		{
+			readSize = (int)Math.ceil((Math.log(entryCount++)/Math.log(2)));
+			phrase = Integer.parseInt(sub(start),2);
+			 System.out.println(phrase);
+			start+=readSize;
+			if(start>=inputString.length()-1)
+			{
+				 break;
+			}
+		}	
+	}
+	public String sub(int i)
+	{
+		return  inputString.substring(i,i+readSize);
 	}
 
-	public byte[] process(byte[] input, int frameSize)
+	public void getCode()throws IOException
 	{
-		try
-		{
-			ArrayList<Byte> outputList = new ArrayList<Byte>();
-
-			byte tempData = 0;
-			int tempSize = 0;
-			int startIndex = 0;
-			byte currOutput = 0;
-
-			for (byte b : input)
-			{
-				tempData = b;
-				if (startIndex > frameSize)
-				{
-					
-				}
-
-				
-
-
-				startIndex = (startIndex + frameSize) % 8;
-			}
-		}
-		catch (Exception e) {}
-		return new byte[1];
+		Scanner sc = new Scanner(System.in);	
+		ArrayList<String> blist = new ArrayList<>();
+		String s=sc.next();
+		byte[] input = s.getBytes();
+		String binarycode="";
+		 for (byte b : input) {
+			readSize = (int)Math.ceil((Math.log(entryCount++)/Math.log(2)));
+			binarycode +=  String.format("%8s", Integer.toBinaryString(b & 0xFF)).replace(' ', '0');
+		 }
+		inputString = binarycode;
+		System.out.println(inputString);
+		entryCount=256;
+		
 	}
 
 }

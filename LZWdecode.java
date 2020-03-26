@@ -42,7 +42,7 @@ class LZWdecode
 		outputStream = new FileOutputStream(new File(args.length == 2 ? args[1] : "output.txt"), false);
 		for (int i : input)
 		{
-			System.out.println("next symbol being processed!");
+			//System.out.println("next symbol being processed!");
 			dictionary[i].output(true);
 		}
 		outputStream.close();
@@ -60,23 +60,22 @@ class LZWdecode
 		{
 			if (parentAddress >= bufferSize)
 			{
-				System.out.println("key value " + parentAddress + " is not in byte range. Searching now...");
+				//System.out.println("key value " + parentAddress + " is not in byte range. Searching now...");
 				dictionary[parentAddress].output(false);
 			}
 			else
 			{
 				outputStream.write((byte)parentAddress);
-				System.out.println("Returning key value " + parentAddress);
-				System.out.println((byte)parentAddress);
+			
 				
 			}
 			if (next != -1)
 			{
-				System.out.println("Going to print next character " + next);
+				//System.out.println("Going to print next character " + next);
 				outputStream.write((byte)next);
-				System.out.println((byte)next);
+				//System.out.println((byte)next);
 			}
-			else System.out.println("no next pointer, nothing to print...");
+			 //System.out.println("no next pointer, nothing to print...");
 		}
 
 		public int returnFirstSymbol()

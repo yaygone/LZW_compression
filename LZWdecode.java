@@ -12,7 +12,7 @@ class LZWdecode
 
 	public void process(String[] args) throws FileNotFoundException, IOException
 	{
-		BufferedReader inputStream = new BufferedReader(new FileReader("compressed.file"));
+		BufferedReader inputStream = new BufferedReader(new InputStreamReader(System.in));
 		List<String> inputRaw = new ArrayList<String>();
 		for (String s = inputStream.readLine(); s != null; s = inputStream.readLine()) inputRaw.add(s);
 		inputStream.close();
@@ -27,7 +27,10 @@ class LZWdecode
 				MapKey tempNode = new MapKey(input[i - bufferSize]);
 				dictionary[i] = tempNode;
 				if (i != dictionary.length - 1)
-			 		tempNode.next = (i == input[i + 1 - bufferSize]) ? tempNode.returnFirstSymbol() : dictionary[input[i + 1 - bufferSize]].returnFirstSymbol();
+				{
+			 		if (i == input[i + 1 - bufferSize]) tempNode.next = tempNode.returnFirstSymbol();
+					else tempNode.next = dictionary[input[i + 1 - bufferSize]].returnFirstSymbol();
+				}
 			}
 		}
 		outputStream = new FileOutputStream(new File("output.txt"), false);

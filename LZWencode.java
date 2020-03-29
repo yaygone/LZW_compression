@@ -7,9 +7,7 @@ class LZWencode
 	static int count = -1;
 	static byte[] input = null;
 	static int dictSize = 0;
-	static String code = "";
 
-	//node class
 	class TrieNode
 	{
 		byte[] dict = new byte[BUFFER_SIZE];
@@ -20,18 +18,11 @@ class LZWencode
 		public TrieNode(byte ch)
 		{ value = ch; }
 
-		//constructor
 		public TrieNode()
 		{
 			for (int i = 0; i < BUFFER_SIZE; i++)
 				children[i] = new TrieNode((byte)i);
 			dictSize = count;
-		}
-
-		public void encode(byte[] charset)
-		{
-			input = charset;
-			while (input.length > 0) find();	
 		}
 		
 		public void find()
@@ -53,7 +44,6 @@ class LZWencode
 				children[emptyIndex] = new TrieNode(curr);
 			}
 			System.out.println(level);
-			code += level + "\n";
 		}
 		
 		public void sub()
@@ -78,14 +68,11 @@ class LZWencode
 			for(x = is.read(); x != -1; x = is.read())
 				list.add((byte)x);
 			input = new byte[list.size()];
-			for(int i = 0; i < list.size(); i++)
+			for (int i = 0; i < list.size(); i++)
 				input[i] = (byte)list.get(i);
 			
 			TrieNode root = new TrieNode();
-			root.encode(input);
-			FileWriter wr = new FileWriter("compressed.file");
-			wr.write(code);
-			wr.close();
+			while (input.length > 0) root.find();
 		}
 		catch(Exception ex)
 		{ System.err.println(ex); }

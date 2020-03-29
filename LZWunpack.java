@@ -3,9 +3,9 @@ import java.util.*;
 
 class LZWunpack
 {
-	String inputString = "";
-	int entryCount = 256;
-	int readSize = 0;
+	static String inputString = "";
+	static int entryCount = 256;
+	static int readSize = 0;
 	
 	public static void main(String[] args) throws IOException
 	{
@@ -24,7 +24,6 @@ class LZWunpack
 		
 		for (byte a : str)
 		{
-			readSize = (int)Math.ceil((Math.log(entryCount++) / Math.log(2)));
 			String st = String.format("%8s", Integer.toBinaryString(a & 0xFF)).replace(' ', '0');
 			inputString += st;
 		}
@@ -56,5 +55,6 @@ class LZWunpack
 		}
 	}
 	public String sub(int i)
-	{ try { return inputString.substring(i, i + readSize); } catch (Exception e) { return null; } }
+	{ try { String returnString = inputString.substring(i, i + readSize); 
+		return returnString; } catch (Exception e) { return null; } }
 }

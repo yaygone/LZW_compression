@@ -10,22 +10,19 @@ class LZWpack
 
 	public static void main(String[] args)
 	{
-		if (args.length > 2 || args.length == 0)
-			System.err.println("Usage requires target file to be packed, and (optional) output file. "
-				+ "Defaults to \"output.pack\" if not given." + "\n" + "example: java LZWpack input.file output.pack");
-		else try { new LZWpack().run(args); } catch (Exception e) { System.err.println(e); }
+		try { new LZWpack().run(args); } catch (Exception e) { System.err.println(e); }
 	}
 
 	public void run(String[] args) throws FileNotFoundException, IOException
 	{
-		BufferedReader reader = new BufferedReader(new FileReader(args[0]));
+		BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
 		
 		//Transfer all input data into an arraylist for processing
 		for (String s = reader.readLine(); s != null; s = reader.readLine())
 			inputList.add(Integer.parseInt(s));
 		reader.close();
 
-		outputStream = new FileOutputStream(new File(args.length == 2 ? args[1] : "output.pack"));
+		outputStream = new FileOutputStream(new File("output.pack"));
 		int[] inputArray = new int[inputList.size()];
 		for (int i = 0; i < inputArray.length; i++)
 			inputArray[i] = Integer.parseInt(inputList.get(i).toString());

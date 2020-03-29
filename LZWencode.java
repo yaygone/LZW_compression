@@ -1,48 +1,37 @@
-import java.io.BufferedReader;
-import java.io.FileInputStream;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.Arrays;
+import java.io.*;
+import java.util.*;
 
 class LZWencode
 {
 	int BUFFER_SIZE = 256;
 	static int count = -1;
 	static byte[] input = null;
-	static String code = "";
 	static int dictSize = 0;
+	static String code = "";
 
 	//node class
-	class trie_node
+	class TrieNode
 	{
 		byte[] dict = new byte[BUFFER_SIZE];
 		byte value;
 		int level = count++;
-		trie_node[] children = new trie_node[BUFFER_SIZE];
+		TrieNode[] children = new TrieNode[BUFFER_SIZE];
 
-		public trie_node(byte ch)
+		public TrieNode(byte ch)
 		{ value = ch; }
 
 		//constructor
-		public trie_node()
+		public TrieNode()
 		{
-			
-			
 			for (int i = 0; i < BUFFER_SIZE; i++)
-			{
-				children[i] = new trie_node((byte)i);
-			}
-			dictSize=count;
+				children[i] = new TrieNode((byte)i);
+			dictSize = count;
 		}
 
 		public void encode(byte[] charset)
 		{
 			input = charset;
-			while (input.length > 0)
-				find();	
+			while (input.length > 0) find();	
 		}
 		
 		public void find()
@@ -61,9 +50,10 @@ class LZWencode
 					}
 					if (emptyIndex == -1 && children[i] == null) emptyIndex = i;
 				}
-				children[emptyIndex] = new trie_node(curr);
+				children[emptyIndex] = new TrieNode(curr);
 			}
-			code += level+"\n";
+			System.out.println(level);
+			code += level + "\n";
 		}
 		
 		public void sub()
@@ -81,28 +71,23 @@ class LZWencode
 	public void run(String[] args)
 	{
 		ArrayList<Byte> list = new ArrayList<>();
-		int x=0;
-        try
-        {
+		int x = 0;
+		try
+		{
 			FileInputStream is = new FileInputStream(args[0]);
-			for(x=is.read();x!=-1;x=is.read())
-			{
+			for(x = is.read(); x != -1; x = is.read())
 				list.add((byte)x);
-			}
 			input = new byte[list.size()];
-			for(int i=0;i<list.size();i++)
-			{
+			for(int i = 0; i < list.size(); i++)
 				input[i] = (byte)list.get(i);
-			}
-            trie_node root = new trie_node();
+			
+			TrieNode root = new TrieNode();
 			root.encode(input);
-			FileWriter wr = new FileWriter("Compressed.txt");
+			FileWriter wr = new FileWriter("compressed.file");
 			wr.write(code);
 			wr.close();
-        }
-        catch(Exception ex)
-        {
-            System.err.println(ex);
-        }
+		}
+		catch(Exception ex)
+		{ System.err.println(ex); }
 	}
 }

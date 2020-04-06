@@ -1,6 +1,12 @@
 import java.io.*;
 import java.util.*;
 
+/**
+ * Encodes the input file using the base-8 LZW method, and outputs index codes to console output.
+ * Can be piped to LZWpack to compress into a bit-packed, compressed file.
+ * COMPX301-20A Assignment 1
+ * @author Shashank Mylarapu 1502775, Ye-Gon Ryoo 1126331
+ */
 class LZWencode
 {
 	int BUFFER_SIZE = 256;
@@ -70,7 +76,6 @@ class LZWencode
 			input = new byte[list.size()];
 			for (int i = 0; i < list.size(); i++)
 				input[i] = (byte)list.get(i);
-			
 			TrieNode root = new TrieNode();
 			while (input.length > 0) root.find();
 		}

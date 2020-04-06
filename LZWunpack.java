@@ -1,6 +1,12 @@
 import java.io.*;
 import java.util.*;
 
+/**
+ * Unpacks the input file to a console output of index codes. Assumes maximum range of 255 for first number.
+ * Can be piped to LZWdecode to get the full uncompressed output.
+ * COMPX301-20A Assignment 1
+ * @author Shashank Mylarapu 1502775, Ye-Gon Ryoo 1126331
+ */
 class LZWunpack
 {
 	static String inputString = "";
@@ -17,16 +23,11 @@ class LZWunpack
 	public void getCode(String file) throws IOException
 	{
 		FileInputStream fs = new FileInputStream(file);
-		int b = 0;
 		ArrayList<Byte> str = new ArrayList<>();
-		for (b = fs.read(); b != -1; b = fs.read())
+		for (int b = fs.read(); b != -1; b = fs.read())
 			str.add((byte)b);
-		
-		for (byte a : str)
-		{
-			String st = String.format("%8s", Integer.toBinaryString(a & 0xFF)).replace(' ', '0');
-			inputString += st;
-		}
+		for (byte b : str)
+			inputString += String.format("%8s", Integer.toBinaryString(b & 0xFF)).replace(' ', '0');
 	}
 
 	public void process() throws IOException
@@ -34,27 +35,28 @@ class LZWunpack
 		int phrase = 0;
 		int start = 0;
 		String subs = "";
-		BufferedWriter br = new BufferedWriter(new OutputStreamWriter(new FileOutputStream("output.unpack")));
+		BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream("output.unpack")));
 		while (true)
 		{
 			readSize = (int)Math.ceil((Math.log(entryCount++) / Math.log(2)));
 			subs = sub(start);
-			if (subs == null)
-			{
-				br.flush();
-				br.close();
-				break;
-			}
+			if (subs == null) break;
 			phrase = Integer.parseInt(subs, 2);
 
-			br.write(Integer.toString(phrase));
-			br.write("\n");
+			writer.write(Integer.toString(phrase));
+			writer.write("\n");
 			System.out.println(Integer.toString(phrase));
 			start += readSize;
 			if (start >= inputString.length() - 1) break;
 		}
+		int finalNo = Integer.parseInt(inputString.substring(start), 2);
+		if (start == inputString.length() - readSize) writer.write(finalNo);
+		writer.flush();
+		writer.close();
 	}
 	public String sub(int i)
-	{ try { String returnString = inputString.substring(i, i + readSize); 
-		return returnString; } catch (Exception e) { return null; } }
+	{
+		try { return inputString.substring(i, i + readSize); }
+		catch (Exception e) { return null; }
+	}
 }

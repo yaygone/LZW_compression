@@ -1,6 +1,11 @@
 import java.util.*;
 import java.io.*;
 
+/**
+ * Takes a console input of index numbers that start at maximum range of 255, and bitpacks them into a file "output.pack".
+ * COMPX301-20A Assignment 1
+ * @author Shashank Mylarapu 1502775, Ye-Gon Ryoo 1126331
+ */
 class LZWpack
 {
 	public static List<Integer> inputList = new ArrayList<Integer>();
@@ -9,14 +14,12 @@ class LZWpack
 	public static FileOutputStream outputStream;
 
 	public static void main(String[] args)
-	{
-		try { new LZWpack().run(args); } catch (Exception e) { System.err.println(e); }
-	}
+	{ try { new LZWpack().run(args); } catch (Exception e) { System.err.println(e); } }
 
 	public void run(String[] args) throws FileNotFoundException, IOException
 	{
 		BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
-		
+		// BufferedReader reader = new BufferedReader(new FileReader("packtest.txt"));
 		//Transfer all input data into an arraylist for processing
 		for (String s = reader.readLine(); s != null; s = reader.readLine())
 			inputList.add(Integer.parseInt(s));
@@ -28,6 +31,7 @@ class LZWpack
 			inputArray[i] = Integer.parseInt(inputList.get(i).toString());
 		process(inputArray);
 	}
+
 	public void process(int[] input) throws IOException
 	{
 		int byteBitCount = 8;

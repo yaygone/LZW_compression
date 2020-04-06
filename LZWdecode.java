@@ -1,6 +1,12 @@
 import java.io.*;
 import java.util.*;
 
+/**
+ * Takes a console input of index numbers that start at maximum range of 255.
+ * Decodes the input using the base-8 LZW method, and outputs it into a file "output.file".
+ * COMPX301-20A Assignment 1
+ * @author Shashank Mylarapu 1502775, Ye-Gon Ryoo 1126331
+ */
 class LZWdecode
 {
 	public int bufferSize = (int)Math.pow(2, 8);
@@ -33,10 +39,10 @@ class LZWdecode
 				}
 			}
 		}
-		outputStream = new FileOutputStream(new File("output.txt"), false);
+		outputStream = new FileOutputStream(new File("output.file"), false);
 		for (int i : input) dictionary[i].output(true);
 		outputStream.close();
-		}
+	}
 		
 	public class MapKey
 	{
